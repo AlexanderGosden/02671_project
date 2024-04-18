@@ -53,20 +53,20 @@ if __name__ == '__main__':
         path = f'data/model_weights/{args.model_type}_weights.pt'
         if os.path.exists(path):
             model.load_state_dict(torch.load(path))
+            model.to(device)
             model.eval()
             print('Model loaded.')
         else:
             raise ValueError(f"Model weights not found at {path}")
 
     
-        # Evaluate model
-        test_data = np.load('data/boxvideo.npy').astype(np.float32)
-        
-        with torch.no_grad():
-            output = model(test_data)
+        # Load data
+        data = np.load('data/boxvideo.npy').astype(np.float32)
+        data = list(DataLoader(dataset=data, batch_size=len(data), shuffle=False))[0]
+
+        # Forward pass
+        output = model(data.to(device)).detach().cpu().numpy()
                 
         # Animate the output
         ani = animate_video(output)
         plt.show()
-
-
