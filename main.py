@@ -1,8 +1,8 @@
 import argparse
 import os
 import torch
-from AE import Encoder, Decoder, AE
-from trainer import Trainer
+from src.models.AE import Encoder, Decoder, AE
+from src.training.trainer import Trainer
 from torch.utils.data import DataLoader
 
 def build_model(model_type: str, device: str, H: int, W: int, latent_dim: int):
