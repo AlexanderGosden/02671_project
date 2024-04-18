@@ -4,6 +4,7 @@ import torch
 from src.models.AE import Encoder, Decoder, AE
 from src.training.trainer import Trainer
 from torch.utils.data import DataLoader
+import numpy as np
 
 def build_model(model_type: str, device: str, H: int, W: int, latent_dim: int):
     if model_type == 'AutoEncoder':
@@ -27,7 +28,7 @@ if __name__ == '__main__':
         # Build model
         model = build_model(args.model_type, device, H=200, W=200, latent_dim=32)
         # Dummy data loader (replace this with your actual data loader)
-        train_loader = DataLoader(dataset=[], batch_size=args.batch_size, shuffle=True)
+        train_loader = DataLoader(dataset=np.load('data/boxvideo.npy'), batch_size=args.batch_size, shuffle=True)
         # Initialize trainer
         trainer = Trainer(model, train_loader, config_path='config.yaml', device=device)
         # Start training
