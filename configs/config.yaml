@@ -17,4 +17,4 @@ training:
       lr: 0.001
 
 AE:
-  D: 128 # dimensionality of the latent space
+  D: 40 # dimensionality of the latent space

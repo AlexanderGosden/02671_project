@@ -5,7 +5,9 @@ from src.models.AE import Encoder, Decoder, AE
 from src.training.trainer import Trainer
 from torch.utils.data import DataLoader
 import numpy as np
-from src.utils.misc import load_config
+from src.utils.misc import load_config, animate_video
+from matplotlib import pyplot as plt
+import matplotlib.animation as animation
 
 def build_model(model_type: str, CFG, device: str):
     H = CFG['data']['H']
@@ -40,6 +42,36 @@ if __name__ == '__main__':
         # Start training
         losses = trainer.train()
         print("Training finished.")
+
+        # Save model
+        torch.save(model.state_dict(), f = f'data/model_weights/{args.model_type}_weights.pt')
         
     if args.mode == 'eval':
         print(f'Evaluating...')
+
+        model = build_model(args.model_type,CFG,device)
+        path = f'data/model_weights/{args.model_type}_weights.pt'
+        if os.path.exists(path):
+            model.load_state_dict(torch.load(path))
+            model.eval()
+            print('Model loaded.')
+        else:
+            raise ValueError(f"Model weights not found at {path}")
+
+    
+        # Evaluate model
+        test_data = np.load('data/boxvideo.npy').astype(np.float32)
+        
+        with torch.no_grad():
+            output = model(test_data)
+                
+        # Animate the output
+        ani = animate_video(output)
+        plt.show()
+
+
+
+
+
+
+
