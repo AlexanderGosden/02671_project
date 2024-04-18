@@ -16,14 +16,12 @@ class Encoder(nn.Module):
             nn.ReLU(),
             nn.Linear(2048, 2048),
             nn.ReLU(),
-            nn.Linear(2048, self.latent_dim * 2)  # Two outputs for mean and log-variance
+            nn.Linear(2048, self.latent_dim) 
         )
         return encoder_net
 
     def forward(self, x: torch.tensor):
-        output = self.encoder_net(x)
-        mean, log_variance = output[:, :self.latent_dim], output[:, self.latent_dim:]
-        return mean, log_variance
+        return self.encoder_net(x)
 
 
 class Decoder(nn.Module):
@@ -41,14 +39,14 @@ class Decoder(nn.Module):
             nn.ReLU(),
             nn.Linear(2048, 2048),
             nn.ReLU(),
-            nn.Linear(2048, self.H * self.W * 3),
+            nn.Linear(2048, self.H * self.W), 
             nn.Sigmoid()  # Sigmoid to map the output to [0, 1] range
         )
         return decoder_net
 
     def forward(self, z: torch.tensor):
-        logits = self.decoder_net(z)  # [N x 3*H*W]
-        logits = logits.view(-1, 3, self.H, self.W)  # Reshape to image dimensions
+        logits = self.decoder_net(z)  # [N x H*W]
+        logits = logits.view(-1, 1, self.H, self.W)  # Reshape to single-channel image dimensions
         return logits
 
 
