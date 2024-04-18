@@ -56,6 +56,12 @@ class AE(nn.Module):
         self.encoder = encoder
         self.decoder = decoder
 
+    def forward(self, x: torch.tensor):
+        x = x
+        z = self.encoder(x)
+        x_recon = self.decoder(z)
+        return x_recon
+
     def loss(self, x: torch.tensor):
         x_recon = self.forward(x)
         return nn.functional.mse_loss(x_recon, x)

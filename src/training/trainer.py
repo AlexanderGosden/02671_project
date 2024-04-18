@@ -22,7 +22,7 @@ class Trainer:
         losses = []
         with tqdm(total=self.CFG['training']['n_epochs']*len(self.train_loader), desc="Training", unit="iter") as pbar:
             for _ in range(self.CFG['training']['n_epochs']):
-                for batch, _ in self.train_loader:
+                for batch in self.train_loader:
                     batch.to(self.device)
                     self.optimizer.zero_grad()
                     loss = self.model.loss(batch)
