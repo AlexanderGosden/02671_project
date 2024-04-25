@@ -2,6 +2,7 @@ from src.utils.misc import load_config
 from tqdm import tqdm
 import torch.optim as optim
 import torch
+import numpy as np
 class Trainer:
     def __init__(self, model, train_loader, config_path: str, device: str) -> None:
         self.model = model
@@ -20,6 +21,7 @@ class Trainer:
         self.model.train()
         self.model.to(self.device)
         total_losses = []
+        best_loss = np.inf
         with tqdm(total=self.CFG['training']['n_epochs']*len(self.train_loader), desc="Training", unit="iter") as pbar:
             for _ in range(self.CFG['training']['n_epochs']):
                 losses = []
@@ -32,5 +34,11 @@ class Trainer:
                     losses.append(loss.item())
                     pbar.set_postfix({'Current loss': sum(losses)/len(losses)}, refresh=True)
                     pbar.update(1)
-                total_losses.append(sum(losses)/len(losses))  
+                avg_loss = sum(losses)/len(losses)
+                # Save best model
+                if avg_loss < best_loss:
+                    best_model = self.model.state_dict()
+                total_losses.append(avg_loss)
+        # Load the model with the lowest loss
+        self.model.load_state_dict(best_model)  
         return total_losses
