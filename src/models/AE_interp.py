@@ -80,7 +80,7 @@ class Decoder(nn.Module):
         return logits
 
 
-class AE(nn.Module):
+class AE_interp(nn.Module):
     def __init__(self, encoder, decoder) -> None:
         super().__init__()
         self.encoder = encoder
@@ -93,5 +93,9 @@ class AE(nn.Module):
         return x_recon
 
     def loss(self, x: torch.tensor):
-        x_recon = self.forward(x)
-        return nn.functional.mse_loss(x_recon, x)
+        z = self.encoder(x)
+        z_interp = (z[0:-2:1]+z[2::1])/2
+        #z_interp = torch.tensor([torch.tensor((z[i] + z[i+2])/2) for i in range(0, len(z)-2, 1)])
+        x_recon = self.decoder(z)
+        x_recon_interp = self.decoder(z_interp)
+        return nn.functional.mse_loss(x_recon, x) + nn.functional.mse_loss(x_recon_interp,x[1:-1])
