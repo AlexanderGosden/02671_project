@@ -19,9 +19,10 @@ class Trainer:
     def train(self):
         self.model.train()
         self.model.to(self.device)
-        losses = []
+        total_losses = []
         with tqdm(total=self.CFG['training']['n_epochs']*len(self.train_loader), desc="Training", unit="iter") as pbar:
             for _ in range(self.CFG['training']['n_epochs']):
+                losses = []
                 for batch in self.train_loader:
                     batch.to(self.device)
                     self.optimizer.zero_grad()
@@ -31,5 +32,5 @@ class Trainer:
                     losses.append(loss.item())
                     pbar.set_postfix({'Current loss': sum(losses)/len(losses)}, refresh=True)
                     pbar.update(1)
-                    
-        return losses
+                total_losses.append(sum(losses)/len(losses))  
+        return total_losses
