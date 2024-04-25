@@ -1,1 +1,4 @@
-models/__pycache__/AE.cpython-*.pyc
+models/__pycache__/*.pyc
+training/__pycache__/*.pyc
+utils/__pycache__/*.pyc
+models/__pycache__/*.pyc
