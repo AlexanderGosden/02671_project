@@ -3,7 +3,7 @@ data:
   W: 200
 
 training:
-  n_epochs: 1200
+  n_epochs: 2400
   batch_size: 100
   optimization:
     optimizer_name: Adam # which optimizer to use during training
@@ -17,4 +17,5 @@ training:
       lr: 0.001
 
 AE:
-  D: 100 # dimensionality of the latent space
+  D: 5 # dimensionality of the latent space
+  N_middle_latent: 400 # number of middle latent variables

@@ -8,18 +8,7 @@ import numpy as np
 from src.utils.misc import load_config, animate_video
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
-
-def build_model(model_type: str, CFG, device: str):
-    H = CFG['data']['H']
-    W = CFG['data']['W']
-    latent_dim = CFG['AE']['D']
-    if model_type == 'AutoEncoder':
-        encoder = Encoder(H, W, latent_dim)
-        decoder = Decoder(H, W, latent_dim)
-        model = AE(encoder, decoder)
-    else:
-        raise ValueError(f"Unsupported model type: {model_type}")
-    return model
+from src.utils.build_model import build_model
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

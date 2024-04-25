@@ -1,48 +1,71 @@
 import torch
 import torch.nn as nn
 
-N_middle_latent = 400
+
 
 class Encoder(nn.Module):
-    def __init__(self, H: int, W: int, latent_dim: int) -> None:
+    def __init__(self, H: int, W: int, latent_dim: int, N_middle_latent : int) -> None:
         super().__init__()
         self.H = H
         self.W = W
         self.latent_dim = latent_dim
+        self.N_middle_latent = N_middle_latent
         self.encoder_net = self.__get_encoder_net()
 
     def __get_encoder_net(self):
         encoder_net = nn.Sequential(
+
             nn.Flatten(),  # flatten image [N x H*W]
-            nn.Linear(self.H * self.W, N_middle_latent),
+            nn.Linear(self.H * self.W, self.N_middle_latent),
             nn.ReLU(),
-            nn.Linear(N_middle_latent, N_middle_latent),
+            nn.Linear(self.N_middle_latent, self.N_middle_latent),
             nn.ReLU(),
-            nn.Linear(N_middle_latent, self.latent_dim) 
+            nn.Linear(self.N_middle_latent, self.latent_dim) 
         )
         return encoder_net
+
+    """
+    def __get_encoder_net(self):
+        padding = (1,1)
+        stride = (4,4)
+        kernel_size = (3,3)
+        dilation = (1,1)
+
+        C_out = 4
+
+        H_out = (self.H + 2*padding[0] - dilation[0]*(kernel_size[0]-1) - 1) // stride[0] + 1
+        W_out = (self.W + 2*padding[1] - dilation[1]*(kernel_size[1]-1) - 1) // stride[1] + 1
+
+        encoder_net = nn.Sequential(
+            nn.Conv2d(1, C_out, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation),
+            nn.ReLU(),
+            nn.Flatten(),  # flatten the output from the conv layers
+            nn.Linear(C_out * H_out * W_out, self.latent_dim)
+            #nn.Linear(self.N_middle_latent, self.latent_dim)
+        )
+        return encoder_net"""
 
     def forward(self, x: torch.tensor):
         return self.encoder_net(x)
 
 
 class Decoder(nn.Module):
-    def __init__(self, H: int, W: int, latent_dim: int) -> None:
+    def __init__(self, H: int, W: int, latent_dim: int, N_middle_latent : int) -> None:
         super().__init__()
         self.H = H
         self.W = W
         self.latent_dim = latent_dim
+        self.N_middle_latent = N_middle_latent
         self.decoder_net = self.__get_decoder_net()
-        self.sigmoid = nn.Sigmoid()
+        
 
     def __get_decoder_net(self):
         decoder_net = nn.Sequential(
-            nn.Linear(self.latent_dim, N_middle_latent),
+            nn.Linear(self.latent_dim, self.N_middle_latent),
             nn.ReLU(),
-            nn.Linear(N_middle_latent, N_middle_latent),
+            nn.Linear(self.N_middle_latent, self.N_middle_latent),
             nn.ReLU(),
-            nn.Linear(N_middle_latent, self.H * self.W), 
-            #nn.Sigmoid()  # Sigmoid to map the output to [0, 1] range
+            nn.Linear(self.N_middle_latent, self.H * self.W), 
         )
         return decoder_net
 
