@@ -1,5 +1,5 @@
-from src.models.AE import Encoder, Decoder, AE
-from src.models.AE_interp import AE_interp
+from src.models.AE import Encoder, Decoder, AE, AE_interp
+#from src.models.AE_interp import AE_interp
 
 
 def build_model(model_type: str, CFG, device: str):

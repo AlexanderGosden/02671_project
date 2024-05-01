@@ -46,10 +46,37 @@ class Encoder(nn.Module):
             nn.Linear(self.N_latent_2, self.latent_dim)
         )
         return encoder_net
+    
+
+    def forward_many_kernels(self, x: torch.tensor):
+        x = x.view(-1, 1, self.H, self.W)
+
+        filter1 = nn.Conv2d(1, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), dilation=(1, 1))
+        filter2 = nn.Conv2d(1, 2, kernel_size=(8, 8), stride=(1, 1), padding=(1, 1), dilation=(1, 1))
+        filter3 = nn.Conv2d(1, 1, kernel_size=(10, 10), stride = (3, 3), padding=(1, 1), dilation=(1, 1))
+        filter4 = nn.Conv2d(2, 3, kernel_size=(3, 3))
+
+        x1 = filter4(filter1(x))
+        x2 = filter2(x)
+        x3 = filter3(x)
+
+        x1 = nn.Flatten()(x1)
+        x2 = nn.Flatten()(x2)
+        x3 = nn.Flatten()(x3)
+
+        x = torch.cat((x1, x2, x3), dim=1)
+        x = nn.ReLU()(x)
+        x = nn.Linear(x.shape[1], self.N_latent_2)(x)
+        x = nn.ReLU()(x)
+        x = nn.Linear(self.N_latent_2, self.latent_dim)(x)
+        
+        return x
 
     def forward(self, x: torch.tensor):
         x = x.view(-1, 1, self.H, self.W)  # Reshape to single-channel image dimensions. Torch expects [N x C x H x W] where C is channel
         return self.encoder_net(x)
+
+        #return self.forward_many_kernels(x)
 
 
 class Decoder(nn.Module):
@@ -93,5 +120,31 @@ class AE(nn.Module):
         return x_recon
 
     def loss(self, x: torch.tensor):
+        x_recon = self.forward(x)
+        return nn.functional.mse_loss(x_recon, x)
+    
+
+
+class AE_interp(nn.Module):
+    def __init__(self, encoder, decoder) -> None:
+        super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+
+    def forward(self, x: torch.tensor):
+        x = x
+        z = self.encoder(x)
+        x_recon = self.decoder(z)
+        return x_recon
+
+    def loss(self, x: torch.tensor):
+        z = self.encoder(x)
+        #z_interp = (z[0:-2:1]+z[2::1])/2
+        #z_interp = torch.cat((z[0:1], z_interp, z[-2:-1]))
+
+        x_recon = self.decoder(z)
+        #x_recon_interp = self.decoder(z_interp)
+        #return nn.functional.mse_loss(x_recon, x) #+ nn.functional.mse_loss(x_recon_interp,x[1:-1])
+
         x_recon = self.forward(x)
         return nn.functional.mse_loss(x_recon, x)

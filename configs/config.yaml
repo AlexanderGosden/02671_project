@@ -1,6 +1,6 @@
 data:
-  H: 200
-  W: 200
+  H: 128
+  W: 128
 
 training:
   n_epochs: 1200
