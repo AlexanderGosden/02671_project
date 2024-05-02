@@ -1,2 +1,3 @@
 # Ignore .pt files
 *.pt
+*.pth
