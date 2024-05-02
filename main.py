@@ -29,24 +29,16 @@ device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
 for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
     interpolated_video = interpolate_linear(np.arange(len(video)), np.arange(0, len(video), 0.1), video)
-
+    CFG = load_config(f'configs/config_{video_name}.yaml')
 
     training_data = list(video.astype(np.float32))
+    train_loader = DataLoader(dataset=training_data, batch_size=CFG['training']['batch_size'], shuffle=True)
 
-    
+    models = [build_model('AutoEncoder', CFG, device), build_model_interp('AutoEncoder', CFG, device)]
     model_names = ['Regular', 'Interp']
 
-    for model_name in model_names:
-        CFG = load_config(f'configs/config_{model_name}.yaml')
 
-        if model_name == 'Interxp':
-            model = build_model_interp('AutoEncoder', CFG, device)
-        elif model_name == 'Regular':
-            model = build_model('AutoEncoder', CFG, device)
-
-
-        train_loader = DataLoader(dataset=training_data, batch_size=CFG['training']['batch_size'], shuffle=True)
-        
+    for model, model_name in zip(models, model_names):
         trainer = Trainer(model, train_loader, config_path = f'configs/config_{model_name}.yaml', device = device)
         losses = trainer.train()
 
