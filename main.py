@@ -39,7 +39,7 @@ for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
     for model_name in model_names:
         CFG = load_config(f'configs/config_{model_name}.yaml')
 
-        if model_name == 'Interp':
+        if model_name == 'Interxp':
             model = build_model_interp('AutoEncoder', CFG, device)
         elif model_name == 'Regular':
             model = build_model('AutoEncoder', CFG, device)
