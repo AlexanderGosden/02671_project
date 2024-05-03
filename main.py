@@ -39,7 +39,7 @@ for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
 
 
     for model, model_name in zip(models, model_names):
-        trainer = Trainer(model, train_loader, config_path = f'configs/config_{model_name}.yaml', device = device)
+        trainer = Trainer(model, train_loader, config_path = f'configs/config_{video_name}.yaml', device = device)
         losses = trainer.train()
 
         #save model

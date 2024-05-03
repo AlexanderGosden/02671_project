@@ -114,7 +114,6 @@ class AE(nn.Module):
         self.decoder = decoder
 
     def forward(self, x: torch.tensor):
-        x = x
         z = self.encoder(x)
         x_recon = self.decoder(z)
         return x_recon
@@ -132,19 +131,18 @@ class AE_interp(nn.Module):
         self.decoder = decoder
 
     def forward(self, x: torch.tensor):
-        x = x
         z = self.encoder(x)
         x_recon = self.decoder(z)
         return x_recon
 
     def loss(self, x: torch.tensor):
         z = self.encoder(x)
-        #z_interp = (z[0:-2:1]+z[2::1])/2
+        z_interp = (z[:-2]+z[2:])/2
         #z_interp = torch.cat((z[0:1], z_interp, z[-2:-1]))
 
         x_recon = self.decoder(z)
-        #x_recon_interp = self.decoder(z_interp)
-        #return nn.functional.mse_loss(x_recon, x) #+ nn.functional.mse_loss(x_recon_interp,x[1:-1])
+        x_recon_interp = self.decoder(z_interp)
+        return nn.functional.mse_loss(x_recon, x) + nn.functional.mse_loss(x_recon_interp,x[1:-1])
 
-        x_recon = self.forward(x)
-        return nn.functional.mse_loss(x_recon, x)
+        #x_recon = self.forward(x)
+        #return nn.functional.mse_loss(x_recon, x)
