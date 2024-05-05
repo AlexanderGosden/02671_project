@@ -1,9 +1,7 @@
 import torch
-from src.models.AE import Encoder, Decoder, AE
 from src.utils.build_model import build_model, build_model_interp
-from src.training.trainer import Trainer
 from torch.utils.data import DataLoader
-from src.utils.misc import load_config, interpolate_linear, animate_video
+from src.utils.misc import load_config, interpolate_linear
 from src.data_utils.boximage import boximage
 import numpy as np
 from matplotlib import pyplot as plt
@@ -22,10 +20,10 @@ np.random.seed(3)
 torch.manual_seed(3)
 torch.cuda.manual_seed_all(3)
 
+# Set device
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-
-
+# Set model titles for plots
 model_titles = ['Naive Interpolation', 'Encoded Interpolation', 'Encoded Interpolation w. Loss']
 
 
@@ -69,17 +67,12 @@ for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
             axs[i, j].imshow(output_interpolated[frame], cmap='gray', vmin = 0, vmax = 255)
         j += 1
 
-        animate = False
-        if animate:
-            ani = animate_video(output_interpolated, interval=20)
-            plt.show()
-
     for i, frame in enumerate(frames_of_interest):
         axs[i, 0].imshow(interpolated_video[frame], cmap='gray', vmin=0, vmax=255)
         
 
         # hide axes labels
-        for j in range(3):
+        for j in range(len(model_names+1)):
             axs[i,j].axes.get_xaxis().set_visible(False)
             axs[i,j].set_yticklabels([])
             axs[i,j].set_yticks([])
