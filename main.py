@@ -16,11 +16,11 @@ np.random.seed(3)
 torch.manual_seed(3)
 torch.cuda.manual_seed_all(3)
 
-n_frames = 10
-box_widths = np.hstack([np.linspace(0, 100, n_frames), np.linspace(100, 10, n_frames)])
-box_heights = np.hstack([np.linspace(0, 100, n_frames), np.linspace(100, 10, n_frames)])
-center_x = np.linspace(0, 100, n_frames*2)
-center_y = np.linspace(28, 128, n_frames*2)
+n_frames = 60
+box_widths = np.hstack([np.linspace(0, 100, n_frames//4), np.linspace(100, 10, n_frames//4), np.linspace(10, 90, n_frames//4), np.linspace(90, 0, n_frames//4)])
+box_heights = box_widths
+center_x = np.hstack([np.linspace(0, 100, n_frames // 2), np.linspace(100, 0, n_frames // 2)])
+center_y = np.linspace(0, 127, n_frames)
 size_video = np.array([boximage(box_width, box_height) for box_width, box_height, cx, cy in zip(box_widths, box_heights, center_x, center_y)])
 moving_video = np.array([boximage(box_width, box_height, center = (cx, cy)) for box_width, box_height, cx, cy in zip(box_widths, box_heights, center_x, center_y)])
 
@@ -67,29 +67,29 @@ for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
         ani = animate_video(interpolated_video)
         plt.show()
 
-        frames_of_interest = [55, 23]
-        frame_names = ['Successful', 'Unsuccessful']
+        #frames_of_interest = [55, 23]
+        #frame_names = ['Successful', 'Unsuccessful']
 
-        fig, axs = plt.subplots(2, len(frames_of_interest), figsize=(3.5, 3.5))
+        #fig, axs = plt.subplots(2, len(frames_of_interest), figsize=(3.5, 3.5))
 
-        for i, frame in enumerate(frames_of_interest):
-            axs[0, i].imshow(interpolated_video[frame], cmap='gray', vmin=0, vmax=255)
-            axs[0, i].set_title(frame_names[i])
+        #for i, frame in enumerate(frames_of_interest):
+        #    axs[0, i].imshow(interpolated_video[frame], cmap='gray', vmin=0, vmax=255)
+        #    axs[0, i].set_title(frame_names[i])
 
-            axs[1, i].imshow(output_interpolated[frame], cmap='gray', vmin = 0, vmax = 255)
+        #    axs[1, i].imshow(output_interpolated[frame], cmap='gray', vmin = 0, vmax = 255)
 
             # hide axes labels
-            for j in range(2):
-                axs[j,i].axes.get_xaxis().set_visible(False)
-                axs[j,i].set_yticklabels([])
-                axs[j,i].set_yticks([])
+        #    for j in range(2):
+        #        axs[j,i].axes.get_xaxis().set_visible(False)
+        #        axs[j,i].set_yticklabels([])
+        #        axs[j,i].set_yticks([])
 
-        axs[0, 0].set_ylabel('Naive interpolation')
-        axs[1, 0].set_ylabel('Encoded interpolation')
+        #axs[0, 0].set_ylabel('Naive interpolation')
+        #axs[1, 0].set_ylabel('Encoded interpolation')
 
-        fig.tight_layout()
+        #fig.tight_layout()
 
-        plt.savefig(f'figures/interpolation_comparison_{model_name}_{video_name}.png', dpi=300)
+        #plt.savefig(f'figures/interpolation_comparison_{model_name}_{video_name}.png', dpi=300)
 
 
 

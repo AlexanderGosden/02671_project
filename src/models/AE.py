@@ -135,14 +135,15 @@ class AE_interp(nn.Module):
         x_recon = self.decoder(z)
         return x_recon
 
-    def loss(self, x: torch.tensor):
+    def loss(self, x: torch.tensor, interp_weight = 1/10):
         z = self.encoder(x)
         z_interp = (z[:-2]+z[2:])/2
         #z_interp = torch.cat((z[0:1], z_interp, z[-2:-1]))
 
         x_recon = self.decoder(z)
         x_recon_interp = self.decoder(z_interp)
-        return nn.functional.mse_loss(x_recon, x) + nn.functional.mse_loss(x_recon_interp,x[1:-1])
+
+        return nn.functional.mse_loss(x_recon, x) + interp_weight * nn.functional.mse_loss(x_recon_interp,x[1:-1])
 
         #x_recon = self.forward(x)
         #return nn.functional.mse_loss(x_recon, x)
