@@ -8,7 +8,7 @@ def load_config(path: str):
         config = yaml.safe_load(file)
     return config
 
-def animate_video(video):
+def animate_video(video, interval = 5):
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 10))
 
@@ -17,7 +17,7 @@ def animate_video(video):
         ax.imshow(video[frame], cmap='gray', vmin=0, vmax=255)
         ax.set_title(f'Frame {frame}')
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(len(video)), interval=5, repeat=False)
+    ani = animation.FuncAnimation(fig, animate, frames=range(len(video)), interval=interval, repeat=False)
 
     return ani
 

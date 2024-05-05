@@ -3,7 +3,7 @@ from src.models.AE import Encoder, Decoder, AE
 from src.utils.build_model import build_model, build_model_interp
 from src.training.trainer import Trainer
 from torch.utils.data import DataLoader
-from src.utils.misc import load_config, interpolate_linear
+from src.utils.misc import load_config, interpolate_linear, animate_video
 from src.data_utils.boximage import boximage
 import numpy as np
 from matplotlib import pyplot as plt
@@ -26,6 +26,9 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 
+model_titles = ['Naive Interpolation', 'Encoded Interpolation', 'Encoded Interpolation w. Loss']
+
+
 for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
     interpolated_video = interpolate_linear(np.arange(len(video)), np.arange(0, len(video), 0.1), video)
     # Load configuration
@@ -41,10 +44,15 @@ for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
     data = list(DataLoader(dataset=data, batch_size=len(data), shuffle=False))[0]
 
 
-    frames_of_interest = [55, 23]
-    frame_names = ['Successful', 'Unsuccessful']
-    fig, axs = plt.subplots(len(frames_of_interest), 3, figsize=(3.5, 3.5))
+    if video_name == 'Moving':
+        frames_of_interest = [214, 323]
+    else:
+        frames_of_interest = [55, 582]
+    frame_names = ['Successful', 'Unsuccessful', '', '', '', '']
+    fig, axs = plt.subplots(len(frames_of_interest), 3, figsize=(8, 6))
     j = 1
+
+
     for model, model_name in zip(models, model_names):
         model_path = "data/model_weights/"+model_name+"_"+video_name+".pth"
 
@@ -61,17 +69,27 @@ for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
             axs[i, j].imshow(output_interpolated[frame], cmap='gray', vmin = 0, vmax = 255)
         j += 1
 
+        animate = False
+        if animate:
+            ani = animate_video(output_interpolated, interval=20)
+            plt.show()
+
     for i, frame in enumerate(frames_of_interest):
         axs[i, 0].imshow(interpolated_video[frame], cmap='gray', vmin=0, vmax=255)
-        axs[i, 0].set_title(frame_names[i])
+        
 
         # hide axes labels
-        for j in range(2):
+        for j in range(3):
             axs[i,j].axes.get_xaxis().set_visible(False)
             axs[i,j].set_yticklabels([])
             axs[i,j].set_yticks([])
 
-        axs[0, 0].set_ylabel('Naive interpolation')
-        axs[0, 1].set_ylabel('Encoded interpolation')
-        axs[0, 2].set_ylabel('Encoded interpolation w. loss')
+            if i == 0:
+                axs[0, j].set_title(model_titles[j])
+
+        axs[i, 0].set_ylabel(f'Frame {frame}')
         fig.tight_layout()
+
+        plt.savefig(f'figures/interp_{video_name}.png', dpi=300)
+
+    plt.show()

@@ -16,6 +16,30 @@ np.random.seed(3)
 torch.manual_seed(3)
 torch.cuda.manual_seed_all(3)
 
+
+#n_frames_per_step = 8
+#width_checkpoints = [0, 100, 10, 90, 0, 80, 10, 100, 10, 90, 0, 80, 10]
+#height_checkpoints = [0, 100, 10, 90, 0, 80, 10, 80, 0, 90, 10, 100, 0]
+
+#box_widths = np.hstack([np.linspace(width_checkpoints[i], width_checkpoints[i+1], n_frames_per_step) for i in range(len(width_checkpoints)-1)])
+#box_heights = np.hstack([np.linspace(height_checkpoints[i], height_checkpoints[i+1], n_frames_per_step) for i in range(len(height_checkpoints)-1)])
+#size_video = np.array([boximage(box_width, box_height) for box_width, box_height in zip(box_widths, box_heights)])
+
+
+#n_frames_per_step = 12
+
+#width_checkpoints = [0, 50, 10, 90, 0]
+#height_checkpoints = width_checkpoints
+#center_x_checkpoints = [20, 100, 80, 100, 20]
+#center_y_checkpoint = [100, 20, 80, 100, 80]
+
+#box_widths = np.hstack([np.linspace(width_checkpoints[i], width_checkpoints[i+1], n_frames_per_step) for i in range(len(width_checkpoints)-1)])
+#box_heights = np.hstack([np.linspace(height_checkpoints[i], height_checkpoints[i+1], n_frames_per_step) for i in range(len(height_checkpoints)-1)])
+#center_x = np.hstack([np.linspace(center_x_checkpoints[i], center_x_checkpoints[i+1], n_frames_per_step) for i in range(len(center_x_checkpoints)-1)])
+#center_y = np.hstack([np.linspace(center_y_checkpoint[i], center_y_checkpoint[i+1], n_frames_per_step) for i in range(len(center_y_checkpoint)-1)])
+
+#moving_video = np.array([boximage(box_width, box_height, center = (cx, cy)) for box_width, box_height, cx, cy in zip(box_widths, box_heights, center_x, center_y)])
+
 n_frames = 60
 box_widths = np.hstack([np.linspace(0, 100, n_frames//4), np.linspace(100, 10, n_frames//4), np.linspace(10, 90, n_frames//4), np.linspace(90, 0, n_frames//4)])
 box_heights = box_widths
@@ -24,15 +48,26 @@ center_y = np.linspace(0, 127, n_frames)
 size_video = np.array([boximage(box_width, box_height) for box_width, box_height, cx, cy in zip(box_widths, box_heights, center_x, center_y)])
 moving_video = np.array([boximage(box_width, box_height, center = (cx, cy)) for box_width, box_height, cx, cy in zip(box_widths, box_heights, center_x, center_y)])
 
+#n_frames = 10
+#box_widths = np.hstack([np.linspace(0, 100, n_frames), np.linspace(100, 10, n_frames)])
+#box_heights = box_widths
+#center_x = np.hstack([np.linspace(10, 80, n_frames), np.linspace(80, 60, n_frames)])
+#center_y = np.hstack([np.linspace(80, 50, n_frames), np.linspace(50, 10, n_frames)])
+#size_video = np.array([boximage(box_width, box_height) for box_width, box_height in zip(box_widths, box_heights)])
+#moving_video = np.array([boximage(box_width, box_height, center = (cx, cy)) for box_width, box_height, cx, cy in zip(box_widths, box_heights, center_x, center_y)])
+
+
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
-    interpolated_video = interpolate_linear(np.arange(len(video)), np.arange(0, len(video), 0.1), video)
+    interpolated_video = interpolate_linear(np.arange(len(video)), np.arange(0, len(video), 0.25), video)
     CFG = load_config(f'configs/config_{video_name}.yaml')
 
     training_data = list(video.astype(np.float32))
     train_loader = DataLoader(dataset=training_data, batch_size=CFG['training']['batch_size'], shuffle=True)
+    data = video.astype(np.float32)
+    data = list(DataLoader(dataset=data, batch_size=len(data), shuffle=False))[0]
 
     models = [build_model('AutoEncoder', CFG, device), build_model_interp('AutoEncoder', CFG, device)]
     model_names = ['Regular', 'Interp']
@@ -50,8 +85,6 @@ for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
         plt.show()
         print(f'Minimal loss: {np.min(losses)}')
 
-        data = video.astype(np.float32)
-        data = list(DataLoader(dataset=data, batch_size=len(data), shuffle=False))[0]
         output = model(data.to(device)).detach().cpu().numpy()
 
         print(f'Reconstruction of pure video loss: {np.mean(np.square(output - data.numpy()))}')
@@ -59,7 +92,7 @@ for video, video_name in zip([size_video, moving_video], ['Regular', 'Moving']):
         plt.show()
 
         encoded = model.encoder(data.to(device)).detach().cpu().numpy()
-        encoded_interpolated = interpolate_linear(np.arange(len(encoded)), np.arange(0, len(encoded), 0.1), encoded).astype(np.float32)
+        encoded_interpolated = interpolate_linear(np.arange(len(encoded)), np.arange(0, len(encoded), 0.25), encoded).astype(np.float32)
         output_interpolated = model.decoder(torch.tensor(encoded_interpolated).to(device)).detach().cpu().numpy()
 
         ani = animate_video(output_interpolated)
