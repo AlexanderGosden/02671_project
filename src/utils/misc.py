@@ -21,6 +21,25 @@ def animate_video(video, interval = 5):
 
     return ani
 
+
+def animate_videos(videos, titles, interval = 5):
+
+    fig, axs = plt.subplots(1, len(videos), figsize=(5*len(videos), 10))
+
+    def animate(frame):
+        for i, ax in enumerate(axs):
+            ax.clear()
+            ax.imshow(videos[i][frame], cmap='gray', vmin=0, vmax=255)
+            ax.axis('off')
+            ax.set_title(f'{titles[i]} Frame {frame}')
+
+    ani = animation.FuncAnimation(fig, animate, frames=range(len(videos[0])), interval=interval, repeat=False)
+
+    return ani
+
+
+
+
 def interpolate_linear(observed_times, new_times, states):
     new_states = np.zeros((len(new_times), *states.shape[1:]))
 
